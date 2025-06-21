@@ -11,7 +11,7 @@ const RoleSelectorModal = ({ isOpen, onClose }) => {
   const handleRoleSelection = (role) => {
     onClose();
     if (role === 'admin') {
-      navigate('/admin/dashboard');
+      navigate('/admin/login', { state: { role } });
     } else {
       navigate('/login', { state: { role } });
     }

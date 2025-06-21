@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const RoleBadge = ({ role }) => {
     const roleClasses = {
@@ -15,18 +16,23 @@ const RoleBadge = ({ role }) => {
 };
 
 const UserTable = () => {
-    const [users, setUsers] = useState([
-        { id: 1, name: 'Ramesh Kumar', email: 'ramesh@example.com', role: 'Buyer', verified: true },
-        { id: 2, name: 'Sunita Devi', email: 'sunita@example.com', role: 'Seller', verified: false },
-        { id: 3, name: 'Amit Singh', email: 'amit@example.com', role: 'Buyer', verified: true },
-        { id: 4, name: 'Priya Sharma', email: 'priya@example.com', role: 'Seller', verified: true },
-        { id: 5, name: 'Sanjay Verma', email: 'sanjay@example.com', role: 'Seller', verified: false },
-    ]);
+    const [users, setUsers] = useState([]);
+    const token = localStorage.getItem('adminToken') || '';
 
-    const handleVerification = (userId) => {
-        setUsers(users.map(user =>
-            user.id === userId ? { ...user, verified: !user.verified } : user
-        ));
+    useEffect(() => {
+        (async () => {
+            const token = localStorage.getItem('adminToken');
+            const res = await axios.get('/api/admin/users', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setUsers(res.data);
+        })();
+    }, []);
+
+    const handleVerification = async (userId) => {
+        const token = localStorage.getItem('adminToken');
+        await axios.patch(`/api/admin/users/${userId}/toggle-verify`, {}, { headers: { Authorization: `Bearer ${token}` } });
+        setUsers(users.map(u => (u.id === userId ? { ...u, verified: !u.verified } : u)));
     };
 
     return (

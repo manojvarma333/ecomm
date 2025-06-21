@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/common/Navbar';
+import { useNavigate } from 'react-router-dom';
 import SurveyModal from '../components/buyer/SurveyModal';
 import ProductGrid from '../components/products/ProductGrid';
 import productImage from '../assets/coming-soon-typography-vector-design (1).jpg';
 
 const BuyerDashboard = () => {
+    const navigate = useNavigate();
     const [showSurvey, setShowSurvey] = useState(false);
     const [activeTab, setActiveTab] = useState('all');
 
@@ -26,15 +28,36 @@ const BuyerDashboard = () => {
         window.location.reload();
     };
 
-    // Mock data for products
-    const allProducts = [
-        { id: 1, name: 'Handcrafted Pottery', price: '450', image: productImage },
-        { id: 2, name: 'Woven Scarf', price: '750', image: productImage },
-        { id: 3, name: 'Herbal Tea Blend', price: '250', image: productImage },
-        { id: 4, name: 'Bamboo Utensils Set', price: '350', image: productImage },
-    ];
+    // Products state and search
+    const [products, setProducts] = useState([]);
+    const [search, setSearch] = useState('');
 
-    const recommendedProducts = allProducts.slice(0, 2); // Mock recommendations
+    const fetchProducts = async (query = '') => {
+        try {
+            const res = await fetch(`/api/products${query}`);
+            const data = await res.json();
+            // Map to include fallback image
+            const mapped = data.map(p => ({
+                ...p,
+                image: p.images?.[0] || productImage,
+            }));
+            setProducts(mapped);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        const q = search.trim();
+        fetchProducts(q ? `?search=${encodeURIComponent(q)}` : '');
+    };
+
+    const recommendedProducts = products.slice(0, 4); // simple placeholder
 
     return (
         <div className="bg-gray-50 min-h-screen">
@@ -54,8 +77,8 @@ const BuyerDashboard = () => {
                     {/* ------------------------------------ */}
                     {/* Optional: Cart and Order History links */}
                     <div className="space-x-4">
-                        <button className="text-blue-600 hover:underline">My Cart</button>
-                        <button className="text-blue-600 hover:underline">Order History</button>
+                        <button onClick={() => navigate('/cart')} className="text-blue-600 hover:underline">My Cart</button>
+                        <button onClick={() => navigate('/buyer/orders')} className="text-blue-600 hover:underline">Order History</button>
                     </div>
                 </div>
 
@@ -85,7 +108,24 @@ const BuyerDashboard = () => {
                 </div>
 
                 <div>
-                    {activeTab === 'all' && <ProductGrid products={allProducts} />}
+                    {/* Search bar */}
+                    <form onSubmit={handleSearch} className="mb-6 max-w-xl flex gap-2">
+                        <input
+                            type="text"
+                            placeholder="Search products..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="flex-grow px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <button
+                            type="submit"
+                            className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            Search
+                        </button>
+                    </form>
+
+                    {activeTab === 'all' && <ProductGrid products={products} />}
                     {activeTab === 'recommended' && <ProductGrid products={recommendedProducts} />}
                 </div>
             </main>

@@ -1,34 +1,25 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-const LoginForm = () => {
+/* Admin login via backend */
+
+const AdminLoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const location = useLocation();
-  const { role } = location.state || { role: 'buyer' }; // Default to buyer if no role is passed
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (role === 'buyer') {
-      try {
-        const res = await axios.post('/api/buyer/login', { email, password });
-        localStorage.setItem('buyerToken', res.data.token);
-        localStorage.setItem('isBuyerAuthenticated', 'true');
-        navigate('/buyer/dashboard');
-      } catch (err) {
-        alert('Login failed');
-      }
-    } else if (role === 'seller') {
-      try {
-        const res = await axios.post('/api/seller/login', { email, password });
-        localStorage.setItem('sellerToken', res.data.token);
-        localStorage.setItem('isSellerAuthenticated', 'true');
-        navigate('/seller/dashboard');
-      } catch (err) {
-        alert(err.response?.data?.message || 'Login failed');
-      }
+
+    try {
+      const res = await axios.post('/api/admin/login', { email, password });
+      localStorage.setItem('adminToken', res.data.token);
+      localStorage.setItem('isAdminAuthenticated', 'true');
+      navigate('/admin/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Login failed');
     }
   };
 
@@ -36,22 +27,22 @@ const LoginForm = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
-          Login as a {role.charAt(0).toUpperCase() + role.slice(1)}
+          Admin Login
         </h2>
-        <p className="text-center text-gray-500 mb-8">Welcome back!</p>
+        <p className="text-center text-gray-500 mb-8">Only site administrator can login</p>
+        {error && (
+          <div className="mb-4 text-red-600 text-center font-medium">
+            {error}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label
-              htmlFor="email"
-              className="text-sm font-semibold text-gray-600"
-            >
+            <label htmlFor="email" className="text-sm font-semibold text-gray-600">
               Email Address
             </label>
             <input
               id="email"
-              name="email"
               type="email"
-              autoComplete="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -59,17 +50,12 @@ const LoginForm = () => {
             />
           </div>
           <div>
-            <label
-              htmlFor="password"
-              className="text-sm font-semibold text-gray-600"
-            >
+            <label htmlFor="password" className="text-sm font-semibold text-gray-600">
               Password
             </label>
             <input
               id="password"
-              name="password"
               type="password"
-              autoComplete="current-password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -83,15 +69,9 @@ const LoginForm = () => {
             Login
           </button>
         </form>
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Don't have an account?{' '}
-          <Link to="/signup" state={{ role }} className="font-semibold text-blue-600 hover:text-blue-500">
-            Sign up
-          </Link>
-        </p>
       </div>
     </div>
   );
 };
 
-export default LoginForm; 
+export default AdminLoginPage;

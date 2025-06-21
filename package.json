@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "axios": "^1.10.0",
+    "js-file-download": "^0.4.12",
+    "razorpay": "^2.9.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2"
@@ -27,5 +29,18 @@
     "globals": "^16.0.0",
     "tailwindcss": "^4.1.10",
     "vite": "^6.3.5"
-  }
+  },
+  "description": "This project is the frontend for a responsive, visually appealing e-commerce platform built with React. It serves three user roles: Admin, Buyer, and Seller, each with a specific dashboard and responsibilities.",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BhavanaNithya/cfg-8.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BhavanaNithya/cfg-8/issues"
+  },
+  "homepage": "https://github.com/BhavanaNithya/cfg-8#readme"
 }

@@ -7,7 +7,7 @@ const ProductList = ({ products, onEdit, onDelete }) => {
       <div className="space-y-4">
         {products.map((product) => (
           <div
-            key={product.id}
+            key={product._id || product.id}
             className="flex items-center justify-between p-4 border rounded-lg"
           >
             <div className="flex items-center space-x-4">
@@ -23,13 +23,13 @@ const ProductList = ({ products, onEdit, onDelete }) => {
             </div>
             <div className="flex space-x-2">
               <button
-                onClick={() => onEdit(product.id)}
+                onClick={() => onEdit(product._id)}
                 className="text-blue-600 hover:text-blue-800"
               >
                 Edit
               </button>
               <button
-                onClick={() => onDelete(product.id)}
+                onClick={() => onDelete(product._id)}
                 className="text-red-600 hover:text-red-800"
               >
                 Delete

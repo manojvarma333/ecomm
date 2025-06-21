@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import StatsCard from '../common/StatsCard';
 
 const MonthlyIncomeIcon = () => (
@@ -28,21 +29,37 @@ const TotalItemsSoldIcon = () => (
 
 
 const StatsSection = () => {
-    // Mock data
+    const [data, setData] = useState(null);
+    const token = localStorage.getItem('sellerToken') || '';
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await axios.get('/api/seller/stats', { headers: { Authorization: `Bearer ${token}` } });
+                setData(res.data);
+            } catch (err) { console.error(err); }
+        };
+        if (token) fetchStats();
+    }, [token]);
+
+    if (!data) {
+        return <div className="h-24" />; // placeholder
+    }
+
     const stats = [
-        { title: 'Monthly Income', value: '₹5,40,000', icon: <MonthlyIncomeIcon /> },
-        { title: 'Total Products', value: '82', icon: <TotalProductsIcon /> },
-        { title: 'Total Orders', value: '1,234', icon: <TotalOrdersIcon /> },
-        { title: 'Total Items Sold', value: '5,678', icon: <TotalItemsSoldIcon /> },
+        { title: 'Monthly Income', value: `₹${data.monthlyIncome}`, icon: <MonthlyIncomeIcon /> },
+        { title: 'Total Products', value: data.totalProducts, icon: <TotalProductsIcon /> },
+        { title: 'Total Orders', value: data.totalOrders, icon: <TotalOrdersIcon /> },
+        { title: 'Total Items Sold', value: data.totalItemsSold, icon: <TotalItemsSoldIcon /> },
     ];
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {stats.map((stat, index) => (
-                <StatsCard key={index} title={stat.title} value={stat.value} icon={stat.icon} />
+            {stats.map((stat, idx) => (
+                <StatsCard key={idx} title={stat.title} value={stat.value} icon={stat.icon} />
             ))}
         </div>
     );
 };
 
-export default StatsSection; 
+export default StatsSection;

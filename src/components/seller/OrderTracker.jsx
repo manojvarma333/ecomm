@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const StatusBadge = ({ status }) => {
     const statusClasses = {
@@ -16,15 +17,39 @@ const StatusBadge = ({ status }) => {
 };
 
 const OrderTracker = () => {
-    const [orders, setOrders] = useState([
-        { id: 'ORD001', customer: 'Ramesh Kumar', date: '2024-03-10', total: '₹1250', status: 'Pending' },
-        { id: 'ORD002', customer: 'Sunita Devi', date: '2024-03-11', total: '₹850', status: 'Shipped' },
-        { id: 'ORD003', customer: 'Amit Singh', date: '2024-03-12', total: '₹2100', status: 'Delivered' },
-        { id: 'ORD004', customer: 'Priya Sharma', date: '2024-03-13', total: '₹500', status: 'Pending' },
-    ]);
+    const [orders, setOrders] = useState([]);
 
-    const handleStatusChange = (orderId, newStatus) => {
-        setOrders(orders.map(order => order.id === orderId ? { ...order, status: newStatus } : order));
+    const sellerToken = localStorage.getItem('sellerToken') || '';
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const res = await axios.get('/api/orders/seller', {
+                    headers: { Authorization: `Bearer ${sellerToken}` },
+                });
+                // include only paid or beyond
+                setOrders(res.data.filter((o) => !['pending'].includes(o.status)));
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        if (sellerToken) fetchOrders();
+    }, [sellerToken]);
+
+
+
+
+
+
+    const handleStatusChange = async (orderId, newStatus) => {
+        try {
+            await axios.patch(`/api/orders/${orderId}/status`, { status: newStatus }, {
+                headers: { Authorization: `Bearer ${sellerToken}` },
+            });
+            setOrders((prev) => prev.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o)));
+        } catch (err) {
+            alert('Failed to update');
+        }
     };
 
     return (
@@ -44,24 +69,23 @@ const OrderTracker = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {orders.map((order) => (
-                            <tr key={order.id}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.id}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.customer}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.date}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.total}</td>
+                            <tr key={order._id}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order._id.slice(-6).toUpperCase()}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.buyerId ? order.buyerId.slice(-6) : 'Buyer'}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{`₹${order.grandTotal}`}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     <StatusBadge status={order.status} />
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     {/* Dropdown to change status */}
                                     <select
-                                        value={order.status}
-                                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                                        defaultValue=""
+                                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
                                         className="text-indigo-600 hover:text-indigo-900 border-gray-300 rounded"
                                     >
-                                        <option>Pending</option>
-                                        <option>Shipped</option>
-                                        <option>Delivered</option>
+                                        <option value="" disabled>Update Status</option>
+                                        <option value="shipped">Shipped</option>
                                     </select>
                                 </td>
                             </tr>

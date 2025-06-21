@@ -1,20 +1,41 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import Navbar from '../components/common/Navbar';
 import ProductGrid from '../components/products/ProductGrid';
 import productImage from '../assets/coming-soon-typography-vector-design (1).jpg';
 
 const LandingPage = () => {
-    // Mock data for products to display on the landing page
-    const products = [
-        { id: 1, name: 'Handcrafted Pottery Vase', price: '1200', image: productImage },
-        { id: 2, name: 'Woven Wall Hanging', price: '1850', image: productImage },
-        { id: 3, name: 'Organic Spice Blend', price: '450', image: productImage },
-        { id: 4, name: 'Bamboo Kitchen Utensils', price: '800', image: productImage },
-        { id: 5, name: 'Hand-painted Fabric', price: '2500', image: productImage },
-        { id: 6, name: 'Herbal Wellness Tea', price: '350', image: productImage },
-        { id: 7, name: 'Beaded Jewelry Set', price: '3200', image: productImage },
-        { id: 8, name: 'Clay Cooking Pot', price: '1500', image: productImage },
-    ];
+    const [products, setProducts] = useState([]);
+    const [recommended, setRecommended] = useState([]);
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    
+
+    useEffect(() => {
+        fetchProducts();
+        // eslint-disable-next-line
+            const token = localStorage.getItem('buyerToken');
+        if(token){
+            axios.get('/api/recommendations',{headers:{Authorization:`Bearer ${token}`}})
+                 .then(r=>{
+                    const mapped=r.data.map(p=>({id:p._id,name:p.name,price:p.price,image:p.images?.[0]||productImage}));
+                    setRecommended(mapped);
+                 }).catch(()=>{});
+        }
+    }, []);
+
+    const fetchProducts = async (query = '') => {
+        const res = await axios.get(`/api/products${query}`);
+        const mapped = res.data.map(p => ({
+            id: p._id,
+            name: p.name,
+            price: p.price,
+            image: p.images[0] || productImage,
+        }));
+        setProducts(mapped);
+    };
+
+    // Search functionality moved to buyer dashboard
+
 
     const categories = [
         'Handicrafts',
@@ -44,7 +65,22 @@ const LandingPage = () => {
                                     {categories.map(category => (
                                         <li key={category}>
                                             <label className="flex items-center space-x-2 cursor-pointer">
-                                                <input type="checkbox" className="rounded text-blue-600 focus:ring-blue-500" />
+                                                <input
+                                                    type="checkbox"
+                                                    className="rounded text-blue-600 focus:ring-blue-500"
+                                                    checked={selectedCategories.includes(category)}
+                                                    onChange={() => {
+                                                        setSelectedCategories((prev) => {
+                                                            const next = prev.includes(category)
+                                                                ? prev.filter((c) => c !== category)
+                                                                : [...prev, category];
+                                                            // fetch products for first page
+                                                            const query = next.length ? `?category=${encodeURIComponent(next[0])}` : '';
+                                                            fetchProducts(query);
+                                                            return next;
+                                                        });
+                                                    }}
+                                                />
                                                 <span>{category}</span>
                                             </label>
                                         </li>
@@ -82,6 +118,13 @@ const LandingPage = () => {
                         </div>
                         <ProductGrid products={products} />
                     </main>
+
+                    {recommended.length>0 && (
+                        <section className="mt-12">
+                          <h2 className="text-2xl font-bold mb-4">Recommended for you</h2>
+                          <ProductGrid products={recommended} />
+                        </section>
+                    )}
                 </div>
             </div>
         </div>

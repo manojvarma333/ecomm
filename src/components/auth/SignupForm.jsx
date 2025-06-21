@@ -1,21 +1,44 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const SignupForm = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [licence, setLicence] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
   const { role } = location.state || { role: 'buyer' };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Basic auth: just redirect without validation
-    if (role === 'buyer') {
-      navigate('/buyer/dashboard');
-    } else if (role === 'seller') {
-      navigate('/seller/dashboard');
+    try {
+      if (role === 'seller') {
+        await axios.post('/api/seller/signup', {
+          fullName: name,
+          email,
+          password,
+          licenceNumber: licence,
+        });
+        alert('Registered! Await admin verification.');
+        navigate('/');
+        return;
+      }
+      if (role === 'buyer') {
+        const res = await axios.post('/api/buyer/signup', {
+          fullName: name,
+          email,
+          password,
+        });
+        localStorage.setItem('buyerToken', res.data.token);
+        localStorage.setItem('isBuyerAuthenticated', 'true');
+        navigate('/buyer/dashboard');
+      } else if (role === 'seller') {
+        navigate('/seller/dashboard');
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -63,6 +86,21 @@ const SignupForm = () => {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
+          {role === 'seller' && (
+            <div>
+              <label htmlFor="licence" className="text-sm font-semibold text-gray-600">
+                Licence Number
+              </label>
+              <input
+                id="licence"
+                type="text"
+                required
+                value={licence}
+                onChange={(e) => setLicence(e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          )}
           <div>
             <label
               htmlFor="password"

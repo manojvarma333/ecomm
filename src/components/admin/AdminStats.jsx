@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import StatsCard from '../common/StatsCard';
 
 const TotalUsersIcon = () => (
@@ -21,19 +22,32 @@ const TotalOrdersIcon = () => (
 );
 
 const AdminStats = () => {
+    const [data, setData] = useState(null);
+    const token = localStorage.getItem('adminToken') || '';
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await axios.get('/api/admin/stats', { headers: { Authorization: `Bearer ${token}` } });
+                setData(res.data);
+            } catch (err) { console.error(err); }
+        };
+        if (token) fetchStats();
+    }, [token]);
+
+    if (!data) return <div className="h-24" />;
+
     const stats = [
-        { title: 'Total Users', value: '1,532', icon: <TotalUsersIcon /> },
-        { title: 'Total Products', value: '341', icon: <TotalProductsIcon /> },
-        { title: 'Total Orders', value: '4,879', icon: <TotalOrdersIcon /> },
+        { title: 'Total Users', value: data.totalUsers, icon: <TotalUsersIcon /> },
+        { title: 'Total Products', value: data.totalProducts, icon: <TotalProductsIcon /> },
+        { title: 'Total Orders', value: data.totalOrders, icon: <TotalOrdersIcon /> }
     ];
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {stats.map((stat, index) => (
-                <StatsCard key={index} title={stat.title} value={stat.value} icon={stat.icon} />
-            ))}
+            {stats.map((s, i) => (<StatsCard key={i} title={s.title} value={s.value} icon={s.icon} />))}
         </div>
     );
 };
 
-export default AdminStats; 
+export default AdminStats;

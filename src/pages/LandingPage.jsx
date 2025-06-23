@@ -49,8 +49,22 @@ const LandingPage = () => {
     ];
 
     return (
-        <div className="bg-gray-50">
+        <div className="min-h-screen bg-gradient-to-b from-cyan-50 via-emerald-50 to-lime-50">
             <Navbar />
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white py-16">
+        <div className="container mx-auto px-6 text-center">
+          <h1 className="text-4xl sm:text-5xl font-extrabold mb-4 drop-shadow-lg">
+            Empowering Rural Artisans
+          </h1>
+          <p className="max-w-2xl mx-auto text-lg sm:text-xl opacity-90 mb-6">
+            Discover authentic handicrafts and home-made products crafted with love by Self Help Groups across India.
+          </p>
+          <a href="#products" className="inline-block bg-white/20 hover:bg-white/30 backdrop-blur-md px-8 py-3 rounded-full font-semibold transition">
+            Browse Products ↓
+          </a>
+        </div>
+      </section>
             <div className="container mx-auto p-4 sm:p-6 lg:p-8">
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Sidebar for Filters */}

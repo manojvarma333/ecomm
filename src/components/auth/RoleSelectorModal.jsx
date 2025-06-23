@@ -18,8 +18,8 @@ const RoleSelectorModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-      <div className="relative mx-auto p-8 border w-96 shadow-lg rounded-xl bg-white transition-opacity-scale-95">
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+      <div className="relative mx-auto p-8 border w-96 shadow-lg rounded-xl bg-white transition-opacity-scale-95 z-50">
         <h3 className="text-2xl font-bold text-center mb-6">Select Your Role</h3>
         <div className="space-y-4">
           <button

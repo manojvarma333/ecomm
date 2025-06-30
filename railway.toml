@@ -1,0 +1,20 @@
+[services]
+backend = { type = "docker", path = "backend", port = 3000 }
+frontend = { type = "static", path = "." }
+
+[env]
+PORT = "3000"
+NODE_ENV = "production"
+
+[env.backend]
+MONGODB_URI = "mongodb+srv://manoj:123456manoj@cluster0.feki4cl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+JWT_SECRET = "8e4f2e0e0a9c466d8d4eab1c96aec837"
+RAZORPAY_KEY_ID = "rzp_test_LuBazVrvZLjD62"
+RAZORPAY_KEY_SECRET = "g9mBkP4uoNrwFRYPZhPMrOLL"
+
+[env.frontend]
+VITE_API_URL = "http://backend:3000"
+
+[build]
+backend = "npm run build"
+frontend = "npm run build"

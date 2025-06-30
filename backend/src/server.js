@@ -30,8 +30,10 @@ app.get('/', (req, res) => {
   res.json({ status: 'API running ✔' });
 });
 
-// Pick port from ENV or default to 5000
-const PORT = process.env.PORT || 5000;
+// Pick port from ENV or default to 3000
+const PORT = process.env.PORT || 3000;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/your-database';
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 // Connect to MongoDB Atlas then start the server
 const bcrypt = require('bcryptjs');

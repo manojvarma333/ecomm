@@ -37,7 +37,7 @@ router.get('/', async (req, res) => {
         .map((e) => e[0]);
       products = await Product.find({ _id: { $in: topIds } }).lean();
     } else if (user && user.role === 'buyer') {
-      const buyerId = req.user.id;
+      const buyerId = user.id;
       const pastOrders = await Order.find({ buyerId }).lean();
       const categoryCount = {};
       const purchasedIds = new Set();
